@@ -6,7 +6,7 @@
 
 ## Live demo
 
-Deployment link: _Add the public Vercel link here after deployment._
+Deployment link: [https://bookworm-ashen.vercel.app](https://bookworm-ashen.vercel.app)
 
 ## Features
 
