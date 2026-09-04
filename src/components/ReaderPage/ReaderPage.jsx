@@ -85,7 +85,14 @@ export default function ReaderPage() {
 
       async function loadBookAndText() {
         const bookRequest = getBook(id, { signal: controller.signal });
-        const textRequest = getReaderText(id, { signal: controller.signal });
+        const textRequest = getReaderText(id, { signal: controller.signal }).then(
+          function keepText(nextText) {
+            return { text: nextText };
+          },
+          function keepTextError(requestError) {
+            return { error: requestError };
+          },
+        );
         const nextBook = await bookRequest;
         setBook(nextBook);
         setLoading(false);
@@ -95,8 +102,12 @@ export default function ReaderPage() {
           return;
         }
 
-        const nextText = await textRequest;
-        setText(nextText);
+        const textResult = await textRequest;
+        if (textResult.error) {
+          throw textResult.error;
+        }
+
+        setText(textResult.text);
         setTextLoading(false);
       }
 
@@ -403,7 +414,10 @@ export default function ReaderPage() {
             <button
               aria-label="Return to start"
               onClick={function returnToStart() {
-                scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                const target = getReadingScrollTarget(scrollContainerRef.current);
+                if (target) {
+                  scrollToReadingPosition(target, 0, 'smooth');
+                }
               }}
               type="button"
             >

@@ -1,4 +1,3 @@
-import Lenis from 'lenis';
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import useReducedMotion from '../../../hooks/useReducedMotion/useReducedMotion';
@@ -25,11 +24,8 @@ export default function AppShell({ children }) {
         return undefined;
       }
 
-      const lenis = new Lenis({
-        duration: 0.9,
-        smoothWheel: true,
-        syncTouch: false,
-      });
+      let cancelled = false;
+      let lenis;
       let frameId;
 
       function raf(time) {
@@ -37,11 +33,28 @@ export default function AppShell({ children }) {
         frameId = window.requestAnimationFrame(raf);
       }
 
-      frameId = window.requestAnimationFrame(raf);
+      async function startSmoothScroll() {
+        const { default: Lenis } = await import('lenis');
+        if (cancelled) {
+          return;
+        }
+
+        lenis = new Lenis({
+          duration: 0.9,
+          smoothWheel: true,
+          syncTouch: false,
+        });
+        frameId = window.requestAnimationFrame(raf);
+      }
+
+      startSmoothScroll();
 
       return function destroyLenis() {
-        window.cancelAnimationFrame(frameId);
-        lenis.destroy();
+        cancelled = true;
+        if (frameId) {
+          window.cancelAnimationFrame(frameId);
+        }
+        lenis?.destroy();
       };
     },
     [location.pathname, reducedMotion],
