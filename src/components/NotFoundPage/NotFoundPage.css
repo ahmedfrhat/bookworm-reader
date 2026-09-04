@@ -1,0 +1,6 @@
+.not-found { min-height: 68vh; display: grid; place-items: center; padding: 4rem 0; text-align: center; background: radial-gradient(circle at center, var(--paper-strong), transparent 58%); }
+.not-found__inner { max-width: 50rem; }
+.not-found__number { color: var(--terracotta); font: clamp(7rem, 25vw, 17rem)/.65 var(--font-display); letter-spacing: -.08em; margin: 1.5rem 0 2rem; }
+.not-found h1 { font-size: clamp(2.6rem, 5vw, 4.8rem); line-height: .98; margin-bottom: 1rem; }
+.not-found__inner > p:not(.eyebrow):not(.not-found__number) { color: var(--muted); margin-bottom: 1.75rem; }
+.not-found .btn-editorial { display: inline-flex; align-items: center; gap: .5rem; }

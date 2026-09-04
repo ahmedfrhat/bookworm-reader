@@ -1,0 +1,116 @@
+.site-header {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  border-bottom: 1px solid rgb(216 200 181 / 72%);
+  background: rgb(247 241 232 / 92%);
+  backdrop-filter: blur(14px);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  gap: 1.5rem;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+  margin-left: auto;
+}
+
+.site-nav__link {
+  position: relative;
+  padding: 0.5rem 0;
+  color: var(--color-ink-soft);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.site-nav__link::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  content: '';
+  background: var(--color-terracotta);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms ease;
+}
+
+.site-nav__link:hover,
+.site-nav__link--active {
+  color: var(--color-burgundy);
+}
+
+.site-nav__link--active::after,
+.site-nav__link:hover::after {
+  transform: scaleX(1);
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.site-header__search,
+.site-header__menu {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: var(--color-burgundy);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  place-items: center;
+}
+
+.site-header__search:hover,
+.site-header__menu:hover {
+  background: var(--color-paper-strong);
+  border-color: var(--color-line);
+}
+
+.site-header__menu {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .site-header__inner {
+    min-height: 64px;
+  }
+
+  .site-header__menu {
+    display: grid;
+  }
+
+  .site-nav {
+    position: absolute;
+    top: calc(100% + 1px);
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0.8rem max(1rem, calc((100vw - 540px) / 2));
+    background: var(--color-paper);
+    border-bottom: 1px solid var(--color-line);
+    box-shadow: var(--shadow-md);
+  }
+
+  .site-nav--open {
+    display: flex;
+  }
+
+  .site-nav__link {
+    padding: 0.85rem 0;
+  }
+}

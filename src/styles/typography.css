@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-burgundy);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  width: 1.8rem;
+  height: 1px;
+  content: '';
+  background: currentColor;
+}
+
+.display-title {
+  max-width: 11ch;
+  margin: 1rem 0 1.25rem;
+  font-size: clamp(3rem, 6vw, 5.3rem);
+  line-height: 0.92;
+}
+
+.body-copy {
+  max-width: 58ch;
+  color: var(--color-ink-soft);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.page-title {
+  margin: 0.5rem 0 0;
+  font-size: clamp(2.45rem, 4vw, 4rem);
+  line-height: 0.98;
+}

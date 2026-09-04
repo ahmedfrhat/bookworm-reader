@@ -1,0 +1,23 @@
+.shelf-page { padding: 4.75rem 0 6rem; }
+.shelf-page__intro { max-width: 43rem; }
+.shelf-page__stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 2.75rem 0 5rem; border-block: 1px solid var(--line); }
+.shelf-page__stats article { min-height: 9.5rem; display: grid; align-content: center; gap: .3rem; padding: 1.5rem 2rem; border-inline-end: 1px solid var(--line); }
+.shelf-page__stats article:last-child { border: 0; }
+.shelf-page__stats svg { color: var(--terracotta); margin-bottom: .3rem; }
+.shelf-page__stats strong { font-family: var(--font-display); font-size: 2.5rem; line-height: 1; }
+.shelf-page__stats span { color: var(--muted); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+.shelf-page__section + .shelf-page__section { margin-top: 5.5rem; }
+.section-heading { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--line); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+.section-heading h2 { font-size: clamp(2rem, 4vw, 3.3rem); margin: 0; }
+.shelf-page__continue-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.continue-card { display: grid; grid-template-columns: 5.25rem 1fr; gap: 1rem; padding: 1rem; background: var(--paper-strong); }
+.continue-card img, .continue-card__fallback { width: 5.25rem; height: 7.5rem; object-fit: cover; background: var(--burgundy); }
+.continue-card p { color: var(--terracotta); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .35rem; }
+.continue-card h3 { font-family: var(--font-display); font-size: 1.5rem; line-height: 1.05; margin-bottom: .7rem; }
+.continue-card__progress { height: 3px; background: color-mix(in srgb, var(--ink) 14%, transparent); margin-bottom: .85rem; }
+.continue-card__progress span { background: var(--terracotta); display: block; height: 100%; }
+.shelf-page__empty { max-width: 40rem; text-align: center; margin: 2rem auto; padding: 4.5rem 2rem; background: var(--paper-strong); }
+.shelf-page__empty svg { color: var(--terracotta); }
+.shelf-page__empty h2 { font-size: 2.6rem; margin: .85rem 0 .35rem; }
+.shelf-page__empty p { color: var(--muted); margin-bottom: 1.5rem; }
+@media (max-width: 767px) { .shelf-page { padding-top: 3rem; } .shelf-page__stats { margin: 2rem 0 3.5rem; } .shelf-page__stats article { min-height: 7.5rem; padding: 1rem; } .shelf-page__stats strong { font-size: 2rem; } .shelf-page__stats span { font-size: .62rem; } .shelf-page__continue-grid { grid-template-columns: 1fr; } .shelf-page__section + .shelf-page__section { margin-top: 3.5rem; } }

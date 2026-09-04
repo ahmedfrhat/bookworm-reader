@@ -1,0 +1,26 @@
+.about-page { padding: 5.5rem 0 6rem; }
+.about-page__hero { max-width: 54rem; }
+.about-page__hero h1 { font-size: clamp(3.4rem, 8vw, 7.5rem); line-height: .9; margin: .7rem 0 1.5rem; }
+.about-page__lede { font: 1.18rem/1.7 var(--font-body); max-width: 39rem; color: var(--ink-soft); }
+.about-page__split { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; margin: 7rem 0; align-items: center; }
+.about-page__manifesto { border-left: 1px solid var(--terracotta); padding: 1rem 2rem; }
+.about-page__manifesto span { color: var(--terracotta); display: block; font: 6rem/.5 var(--font-display); }
+.about-page__manifesto p { font: 2.5rem/1.04 var(--font-display); margin: 1rem 0 0; }
+.about-page__copy { color: var(--ink-soft); font-size: 1.05rem; line-height: 1.8; }
+.about-page__copy p + p { margin-top: 1.5rem; }
+.about-page__principles { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.about-page__principles article { padding: 2rem; border-right: 1px solid var(--line); }
+.about-page__principles article:last-child { border: 0; }
+.about-page__principles svg { color: var(--terracotta); }
+.about-page__principles h2 { font-size: 2rem; margin: 1.5rem 0 .5rem; }
+.about-page__principles p, .about-page__fine-print { color: var(--muted); line-height: 1.65; }
+.about-page__sources { max-width: 46rem; margin: 7rem auto; text-align: center; }
+.about-page__sources h2, .about-page__cta h2 { font-size: clamp(2.5rem, 5vw, 4.5rem); margin: .7rem 0 1.5rem; }
+.about-page__source-links { display: flex; justify-content: center; gap: .75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.about-page__source-links a { display: inline-flex; align-items: center; gap: .35rem; padding: .75rem 1rem; border: 1px solid var(--line); }
+.about-page__source-links a:hover { border-color: var(--terracotta); color: var(--burgundy); }
+.about-page__fine-print { font-size: .85rem; }
+.about-page__cta { display: flex; justify-content: space-between; align-items: center; gap: 2rem; padding: 3rem; background: var(--burgundy); color: var(--white); }
+.about-page__cta h2 { max-width: 33rem; }
+.about-page__cta .btn-editorial { background: var(--terracotta); border-color: var(--terracotta); white-space: nowrap; }
+@media (max-width: 767px) { .about-page { padding-top: 3rem; } .about-page__split { grid-template-columns: 1fr; margin: 4rem 0; gap: 2rem; } .about-page__manifesto p { font-size: 2rem; } .about-page__principles { grid-template-columns: 1fr; } .about-page__principles article { border-right: 0; border-bottom: 1px solid var(--line); } .about-page__principles article:last-child { border: 0; } .about-page__sources { margin: 4.5rem 0; } .about-page__cta { align-items: flex-start; flex-direction: column; padding: 2rem; } }

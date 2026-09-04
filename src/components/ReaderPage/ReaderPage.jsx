@@ -1,0 +1,382 @@
+import {
+  BookmarkPlus,
+  CheckCircle2,
+  ChevronLeft,
+  ExternalLink,
+  Minus,
+  Plus,
+  RotateCcw,
+} from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { useLibrary } from '../../context/LibraryContext/LibraryContext';
+import { useReader } from '../../context/ReaderContext/ReaderContext';
+import { getBook } from '../../services/GutendexApi/GutendexApi';
+import { formatAuthors } from '../../utils/bookHelpers/bookHelpers';
+import { paragraphsFromText } from '../../utils/readerHelpers/readerHelpers';
+import { EmptyState, ErrorState, LoadingState } from '../ui/States/States';
+import './ReaderPage.css';
+
+function createProgressBook(book) {
+  return {
+    id: book.id,
+    title: book.title,
+    authors: book.authors,
+    coverUrl: book.coverUrl,
+    languages: book.languages,
+    subjects: book.subjects,
+    bookshelves: book.bookshelves,
+    sourceUrl: book.sourceUrl,
+    hasReadableText: book.hasReadableText,
+  };
+}
+
+export default function ReaderPage() {
+  const { id } = useParams();
+  const { isCompleted, toggleCompleted } = useLibrary();
+  const {
+    addBookmark,
+    bookmarksByBook,
+    progressByBook,
+    removeBookmark,
+    saveProgress,
+    settings,
+    updateSettings,
+  } = useReader();
+  const [book, setBook] = useState(null);
+  const [text, setText] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const scrollContainerRef = useRef(null);
+  const restoreAttemptedRef = useRef(false);
+
+  useEffect(
+    function loadReader() {
+      const controller = new AbortController();
+      restoreAttemptedRef.current = false;
+      setLoading(true);
+      setError('');
+      setText('');
+
+      async function loadBookAndText() {
+        const nextBook = await getBook(id, { signal: controller.signal });
+        setBook(nextBook);
+
+        if (!nextBook.hasReadableText) {
+          return;
+        }
+
+        const response = await fetch('/api/read-book?bookId=' + encodeURIComponent(id), {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error('The in-app reader is unavailable for this book right now.');
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.toLowerCase().startsWith('text/plain')) {
+          throw new Error('The in-app reader is available after Vercel deployment.');
+        }
+
+        const nextText = await response.text();
+        setText(nextText);
+      }
+
+      loadBookAndText()
+        .catch(function handleReaderError(requestError) {
+          if (requestError.name !== 'AbortError' && requestError.name !== 'CanceledError') {
+            setError(requestError.message || 'The reader could not be opened.');
+          }
+        })
+        .finally(function finishReaderRequest() {
+          if (!controller.signal.aborted) {
+            setLoading(false);
+          }
+        });
+
+      return function cancelReaderRequest() {
+        controller.abort();
+      };
+    },
+    [id, refreshKey],
+  );
+
+  const paragraphs = useMemo(
+    function createParagraphs() {
+      return paragraphsFromText(text);
+    },
+    [text],
+  );
+  const savedProgress = progressByBook[id];
+  const bookmarks = bookmarksByBook[id] || [];
+
+  useEffect(
+    function restoreReadingPosition() {
+      if (
+        !paragraphs.length ||
+        !savedProgress ||
+        restoreAttemptedRef.current ||
+        !scrollContainerRef.current
+      ) {
+        return;
+      }
+
+      const container = scrollContainerRef.current;
+      const frameId = window.requestAnimationFrame(function scrollToSavedPosition() {
+        container.scrollTop = savedProgress.scrollTop || 0;
+        restoreAttemptedRef.current = true;
+      });
+
+      return function cancelRestoreFrame() {
+        window.cancelAnimationFrame(frameId);
+      };
+    },
+    [paragraphs.length, savedProgress],
+  );
+
+  function saveCurrentProgress() {
+    const container = scrollContainerRef.current;
+
+    if (!container || !book) {
+      return;
+    }
+
+    const maxScroll = Math.max(container.scrollHeight - container.clientHeight, 1);
+    const ratio = Math.min(1, Math.max(0, container.scrollTop / maxScroll));
+    saveProgress(id, {
+      scrollTop: container.scrollTop,
+      ratio,
+      book: createProgressBook(book),
+    });
+  }
+
+  function addCurrentBookmark() {
+    const container = scrollContainerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const maxScroll = Math.max(container.scrollHeight - container.clientHeight, 1);
+    addBookmark(id, {
+      scrollTop: container.scrollTop,
+      ratio: Math.min(1, Math.max(0, container.scrollTop / maxScroll)),
+      label: 'Reading marker',
+    });
+  }
+
+  function jumpToBookmark(bookmark) {
+    if (!scrollContainerRef.current) {
+      return;
+    }
+
+    scrollContainerRef.current.scrollTo({
+      top: bookmark.scrollTop,
+      behavior: 'smooth',
+    });
+  }
+
+  if (loading) {
+    return (
+      <section className="page-shell">
+        <div className="container"><LoadingState label="Preparing your reading room…" /></div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="page-shell">
+        <div className="container">
+          <ErrorState
+            message={error}
+            onRetry={function retryReader() {
+              setRefreshKey(function nextKey(currentKey) {
+                return currentKey + 1;
+              });
+            }}
+          />
+          {book && (
+            <div className="reader-page__fallback-link">
+              <a href={book.sourceUrl} rel="noreferrer" target="_blank">
+                Open the official Gutenberg source <ExternalLink size={15} />
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  if (!book || !book.hasReadableText) {
+    return (
+      <section className="page-shell">
+        <div className="container">
+          <EmptyState
+            action={
+              book && (
+                <a className="btn-editorial" href={book.sourceUrl} rel="noreferrer" target="_blank">
+                  <ExternalLink size={16} /> Open official source
+                </a>
+              )
+            }
+            description="This title does not provide a plain-text reading format for Bookworm."
+            title="This book cannot be opened in the reader."
+          />
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="reader-page" data-reader-theme={settings.theme}>
+      <div className="reader-page__topbar">
+        <div className="container reader-page__topbar-inner">
+          <Link className="reader-page__back" to={'/book/' + book.id}>
+            <ChevronLeft aria-hidden="true" size={18} /> Details
+          </Link>
+          <div className="reader-page__title">
+            <strong>{book.title}</strong>
+            <span>{formatAuthors(book.authors)}</span>
+          </div>
+          <a
+            aria-label="Open official source"
+            className="reader-page__source"
+            href={book.sourceUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <ExternalLink size={17} />
+          </a>
+        </div>
+      </div>
+      <div className="reader-page__workspace">
+        <aside className="reader-page__toolbar" aria-label="Reading settings">
+          <div className="reader-page__tool-group">
+            <span>Text size</span>
+            <div className="reader-page__tool-row">
+              <button
+                aria-label="Decrease font size"
+                disabled={settings.fontSize <= 16}
+                onClick={function decreaseFontSize() {
+                  updateSettings({ fontSize: settings.fontSize - 2 });
+                }}
+                type="button"
+              >
+                <Minus size={16} />
+              </button>
+              <strong>{settings.fontSize}px</strong>
+              <button
+                aria-label="Increase font size"
+                disabled={settings.fontSize >= 28}
+                onClick={function increaseFontSize() {
+                  updateSettings({ fontSize: settings.fontSize + 2 });
+                }}
+                type="button"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+          <label className="reader-page__setting">
+            <span>Theme</span>
+            <select
+              onChange={function changeTheme(event) {
+                updateSettings({ theme: event.target.value });
+              }}
+              value={settings.theme}
+            >
+              <option value="light">Paper</option>
+              <option value="sepia">Sepia</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+          <label className="reader-page__setting">
+            <span>Width</span>
+            <select
+              onChange={function changeWidth(event) {
+                updateSettings({ contentWidth: event.target.value });
+              }}
+              value={settings.contentWidth}
+            >
+              <option value="36rem">Narrow</option>
+              <option value="42rem">Comfortable</option>
+              <option value="52rem">Wide</option>
+            </select>
+          </label>
+          <button className="reader-page__tool-action" onClick={addCurrentBookmark} type="button">
+            <BookmarkPlus size={16} /> Mark place
+          </button>
+          <button
+            className={'reader-page__tool-action' + (isCompleted(book.id) ? ' reader-page__tool-action--active' : '')}
+            onClick={function markCompleted() {
+              toggleCompleted(book.id);
+            }}
+            type="button"
+          >
+            <CheckCircle2 size={16} />
+            {isCompleted(book.id) ? 'Completed' : 'Mark completed'}
+          </button>
+        </aside>
+        <div
+          className="reader-page__scroll"
+          onScroll={saveCurrentProgress}
+          ref={scrollContainerRef}
+        >
+          <article
+            className="reader-page__content"
+            style={{
+              fontSize: settings.fontSize + 'px',
+              lineHeight: settings.lineHeight,
+              maxWidth: settings.contentWidth,
+            }}
+          >
+            <header>
+              <p className="eyebrow">Now reading</p>
+              <h1>{book.title}</h1>
+              <p>{formatAuthors(book.authors)}</p>
+            </header>
+            {paragraphs.map(function renderParagraph(paragraph, index) {
+              return <p key={index}>{paragraph}</p>;
+            })}
+          </article>
+        </div>
+        <aside className="reader-page__markers">
+          <div className="reader-page__markers-head">
+            <span>Bookmarks</span>
+            <button
+              aria-label="Return to start"
+              onClick={function returnToStart() {
+                scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              type="button"
+            >
+              <RotateCcw size={15} />
+            </button>
+          </div>
+          {!bookmarks.length && <p>Mark a place to save it here.</p>}
+          {bookmarks.map(function renderBookmark(bookmark) {
+            return (
+              <div className="reader-page__marker" key={bookmark.id}>
+                <button onClick={function jumpToMarker() { jumpToBookmark(bookmark); }} type="button">
+                  {Math.round(bookmark.ratio * 100)}% through
+                </button>
+                <button
+                  aria-label="Remove bookmark"
+                  onClick={function deleteBookmark() {
+                    removeBookmark(id, bookmark.id);
+                  }}
+                  type="button"
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })}
+        </aside>
+      </div>
+    </section>
+  );
+}

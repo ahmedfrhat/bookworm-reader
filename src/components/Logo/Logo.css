@@ -1,0 +1,36 @@
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.58rem;
+  color: var(--color-burgundy);
+}
+
+.brand-logo__mark {
+  width: 2.3rem;
+  height: 2.3rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.brand-logo__bookmark {
+  fill: var(--color-terracotta);
+  stroke: currentColor;
+}
+
+.brand-logo__wordmark {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+.brand-logo--light {
+  color: var(--color-paper);
+}
+
+.brand-logo--light .brand-logo__wordmark {
+  color: var(--color-paper);
+}
