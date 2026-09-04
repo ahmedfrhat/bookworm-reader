@@ -31,6 +31,27 @@ function createProgressBook(book) {
   };
 }
 
+function usesPageScroll() {
+  return window.matchMedia('(max-width: 767.98px)').matches;
+}
+
+function getReadingScrollTarget(container) {
+  if (usesPageScroll()) {
+    return document.scrollingElement || document.documentElement;
+  }
+
+  return container;
+}
+
+function scrollToReadingPosition(target, top, behavior = 'auto') {
+  if (usesPageScroll()) {
+    window.scrollTo({ top, behavior });
+    return;
+  }
+
+  target.scrollTo({ top, behavior });
+}
+
 export default function ReaderPage() {
   const { id } = useParams();
   const { isCompleted, toggleCompleted } = useLibrary();
@@ -117,15 +138,18 @@ export default function ReaderPage() {
       if (
         !paragraphs.length ||
         !savedProgress ||
-        restoreAttemptedRef.current ||
-        !scrollContainerRef.current
+        restoreAttemptedRef.current
       ) {
         return;
       }
 
-      const container = scrollContainerRef.current;
+      const target = getReadingScrollTarget(scrollContainerRef.current);
+      if (!target) {
+        return;
+      }
+
       const frameId = window.requestAnimationFrame(function scrollToSavedPosition() {
-        container.scrollTop = savedProgress.scrollTop || 0;
+        scrollToReadingPosition(target, savedProgress.scrollTop || 0);
         restoreAttemptedRef.current = true;
       });
 
@@ -136,46 +160,71 @@ export default function ReaderPage() {
     [paragraphs.length, savedProgress],
   );
 
-  function saveCurrentProgress() {
-    const container = scrollContainerRef.current;
+  useEffect(
+    function persistMobileReaderProgress() {
+      if (!book || !text || !usesPageScroll()) {
+        return undefined;
+      }
 
-    if (!container || !book) {
+      function savePageProgress() {
+        const target = getReadingScrollTarget(scrollContainerRef.current);
+        const maxScroll = Math.max(target.scrollHeight - target.clientHeight, 1);
+        const scrollTop = window.scrollY;
+        saveProgress(id, {
+          scrollTop,
+          ratio: Math.min(1, Math.max(0, scrollTop / maxScroll)),
+          book: createProgressBook(book),
+        });
+      }
+
+      window.addEventListener('scroll', savePageProgress, { passive: true });
+      return function stopSavingMobileProgress() {
+        window.removeEventListener('scroll', savePageProgress);
+      };
+    },
+    [book, id, saveProgress, text],
+  );
+
+  function saveCurrentProgress() {
+    const target = getReadingScrollTarget(scrollContainerRef.current);
+
+    if (!target || !book) {
       return;
     }
 
-    const maxScroll = Math.max(container.scrollHeight - container.clientHeight, 1);
-    const ratio = Math.min(1, Math.max(0, container.scrollTop / maxScroll));
+    const maxScroll = Math.max(target.scrollHeight - target.clientHeight, 1);
+    const scrollTop = usesPageScroll() ? window.scrollY : target.scrollTop;
+    const ratio = Math.min(1, Math.max(0, scrollTop / maxScroll));
     saveProgress(id, {
-      scrollTop: container.scrollTop,
+      scrollTop,
       ratio,
       book: createProgressBook(book),
     });
   }
 
   function addCurrentBookmark() {
-    const container = scrollContainerRef.current;
+    const target = getReadingScrollTarget(scrollContainerRef.current);
 
-    if (!container) {
+    if (!target) {
       return;
     }
 
-    const maxScroll = Math.max(container.scrollHeight - container.clientHeight, 1);
+    const maxScroll = Math.max(target.scrollHeight - target.clientHeight, 1);
+    const scrollTop = usesPageScroll() ? window.scrollY : target.scrollTop;
     addBookmark(id, {
-      scrollTop: container.scrollTop,
-      ratio: Math.min(1, Math.max(0, container.scrollTop / maxScroll)),
+      scrollTop,
+      ratio: Math.min(1, Math.max(0, scrollTop / maxScroll)),
       label: 'Reading marker',
     });
   }
 
   function jumpToBookmark(bookmark) {
-    if (!scrollContainerRef.current) {
+    const target = getReadingScrollTarget(scrollContainerRef.current);
+    if (!target) {
       return;
     }
 
-    scrollContainerRef.current.scrollTo({
-      top: bookmark.scrollTop,
-      behavior: 'smooth',
-    });
+    scrollToReadingPosition(target, bookmark.scrollTop, 'smooth');
   }
 
   if (loading) {
