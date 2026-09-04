@@ -27,7 +27,7 @@ Deployment link: [https://bookworm-iota-livid.vercel.app](https://bookworm-iota-
 - Axios
 - Lucide React icons
 - Lenis (subtle non-reader-page smooth scrolling)
-- Browser cache for recently opened book text
+- In-memory catalog cache and browser cache for recently opened book text
 - Gutendex API / Project Gutenberg public-domain catalog
 - Vercel Serverless Function for safe same-origin text fetching in the Reader
 
