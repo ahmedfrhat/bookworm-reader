@@ -6,7 +6,7 @@
 
 ## Live demo
 
-Deployment link: [https://bookworm-ashen.vercel.app](https://bookworm-ashen.vercel.app)
+Deployment link: [https://bookworm-iota-livid.vercel.app](https://bookworm-iota-livid.vercel.app)
 
 ## Features
 

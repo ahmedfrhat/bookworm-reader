@@ -1,4 +1,3 @@
-const BOOKS_URL = 'https://gutendex.com/books/';
 const MAX_TEXT_SIZE = 4_500_000;
 
 function sendJson(response, status, body) {
@@ -15,14 +14,6 @@ function fetchWithTimeout(url, options = {}, timeout = 12000) {
   return fetch(url, { ...options, signal: controller.signal }).finally(function clearTimer() {
     clearTimeout(timer);
   });
-}
-
-function getTextUrl(formats = {}) {
-  const key = Object.keys(formats).find(function findPlainTextFormat(formatKey) {
-    return formatKey.startsWith('text/plain');
-  });
-
-  return key ? formats[key] : null;
 }
 
 function isGutenbergHost(url) {
@@ -47,22 +38,14 @@ export default async function handler(request, response) {
   }
 
   try {
-    const metadataResponse = await fetchWithTimeout(BOOKS_URL + bookId + '/');
-
-    if (!metadataResponse.ok) {
-      return sendJson(response, metadataResponse.status, { error: 'Book metadata was not found.' });
-    }
-
-    const metadata = await metadataResponse.json();
-    const textUrl = getTextUrl(metadata.formats);
-
-    if (!textUrl || !isGutenbergHost(textUrl)) {
-      return sendJson(response, 422, { error: 'This title has no supported plain-text format.' });
-    }
+    // Gutendex supplies catalog metadata to the browser. Fetch the text directly from
+    // Gutenberg here because Gutendex blocks server-to-server calls from some hosts.
+    const textUrl = 'https://www.gutenberg.org/ebooks/' + bookId + '.txt.utf-8';
 
     const textResponse = await fetchWithTimeout(textUrl, {
       headers: {
-        'User-Agent': 'Bookworm graduation project reader',
+        Accept: 'text/plain, text/*;q=0.9, */*;q=0.1',
+        'User-Agent': 'Bookworm student reader (public-domain text fetch)',
       },
     });
 
