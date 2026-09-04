@@ -148,9 +148,9 @@ export default function ReaderPage() {
         return;
       }
 
+      restoreAttemptedRef.current = true;
       const frameId = window.requestAnimationFrame(function scrollToSavedPosition() {
         scrollToReadingPosition(target, savedProgress.scrollTop || 0);
-        restoreAttemptedRef.current = true;
       });
 
       return function cancelRestoreFrame() {
