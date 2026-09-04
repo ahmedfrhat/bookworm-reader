@@ -38,8 +38,6 @@ export default async function handler(request, response) {
   }
 
   try {
-    // Gutendex supplies catalog metadata to the browser. Fetch the text directly from
-    // Gutenberg here because Gutendex blocks server-to-server calls from some hosts.
     const textUrl = 'https://www.gutenberg.org/ebooks/' + bookId + '.txt.utf-8';
 
     const textResponse = await fetchWithTimeout(textUrl, {

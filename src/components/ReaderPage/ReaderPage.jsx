@@ -12,6 +12,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useLibrary } from '../../context/LibraryContext/LibraryContext';
 import { useReader } from '../../context/ReaderContext/ReaderContext';
 import { getBook } from '../../services/GutendexApi/GutendexApi';
+import { getReaderText } from '../../services/ReaderTextCache/ReaderTextCache';
 import { formatAuthors } from '../../utils/bookHelpers/bookHelpers';
 import { paragraphsFromText } from '../../utils/readerHelpers/readerHelpers';
 import { EmptyState, ErrorState, LoadingState } from '../ui/States/States';
@@ -67,6 +68,7 @@ export default function ReaderPage() {
   const [book, setBook] = useState(null);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [textLoading, setTextLoading] = useState(true);
   const [error, setError] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
   const scrollContainerRef = useRef(null);
@@ -77,32 +79,25 @@ export default function ReaderPage() {
       const controller = new AbortController();
       restoreAttemptedRef.current = false;
       setLoading(true);
+      setTextLoading(true);
       setError('');
       setText('');
 
       async function loadBookAndText() {
-        const nextBook = await getBook(id, { signal: controller.signal });
+        const bookRequest = getBook(id, { signal: controller.signal });
+        const textRequest = getReaderText(id, { signal: controller.signal });
+        const nextBook = await bookRequest;
         setBook(nextBook);
+        setLoading(false);
 
         if (!nextBook.hasReadableText) {
+          setTextLoading(false);
           return;
         }
 
-        const response = await fetch('/api/read-book?bookId=' + encodeURIComponent(id), {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error('The in-app reader is unavailable for this book right now.');
-        }
-
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.toLowerCase().startsWith('text/plain')) {
-          throw new Error('The in-app reader is available after Vercel deployment.');
-        }
-
-        const nextText = await response.text();
+        const nextText = await textRequest;
         setText(nextText);
+        setTextLoading(false);
       }
 
       loadBookAndText()
@@ -114,6 +109,7 @@ export default function ReaderPage() {
         .finally(function finishReaderRequest() {
           if (!controller.signal.aborted) {
             setLoading(false);
+            setTextLoading(false);
           }
         });
 
@@ -387,9 +383,18 @@ export default function ReaderPage() {
               <h1>{book.title}</h1>
               <p>{formatAuthors(book.authors)}</p>
             </header>
-            {paragraphs.map(function renderParagraph(paragraph, index) {
-              return <p key={index}>{paragraph}</p>;
-            })}
+            {textLoading ? (
+              <div aria-live="polite" className="reader-page__loading-copy">
+                <span />
+                <span />
+                <span />
+                <p>Setting your pages…</p>
+              </div>
+            ) : (
+              paragraphs.map(function renderParagraph(paragraph, index) {
+                return <p key={index}>{paragraph}</p>;
+              })
+            )}
           </article>
         </div>
         <aside className="reader-page__markers">

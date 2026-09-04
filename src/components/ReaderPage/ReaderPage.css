@@ -202,6 +202,30 @@
   line-height: 0.75;
 }
 
+.reader-page__loading-copy {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1.5rem;
+}
+
+.reader-page__loading-copy span {
+  display: block;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--reader-line), var(--reader-surface), var(--reader-line));
+  background-size: 200% 100%;
+  animation: reader-loading 1.4s ease-in-out infinite;
+}
+
+.reader-page__loading-copy span:nth-child(2) { width: 92%; }
+.reader-page__loading-copy span:nth-child(3) { width: 70%; }
+.reader-page__loading-copy p { margin-top: .75rem; color: var(--reader-muted); font: .78rem var(--font-ui); }
+
+@keyframes reader-loading {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
 .reader-page__markers {
   color: var(--reader-muted);
   font-size: 0.76rem;
