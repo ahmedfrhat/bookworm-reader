@@ -100,16 +100,10 @@ The catalog comes from [Gutendex](https://gutendex.com/), an API for [Project Gu
 
 ## Screenshots
 
-Final screenshots belong in [`docs/screenshots`](./docs/screenshots/). Capture the final rendered pages before submitting:
+Final live screenshots are included in [`docs/screenshots`](./docs/screenshots/):
 
-- Home
-- Library
-- Book details
-- Reader
-- My Shelf
-- About
-- 404 page
-- At least one mobile view
+- Desktop: Home, Library, Book details, Reader, My Shelf, About, and 404 page
+- Mobile: Home, Library, and Reader at 390 × 844
 
 ## Deployment checklist
 

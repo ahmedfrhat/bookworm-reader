@@ -1,6 +1,8 @@
-# Screenshot checklist
+# Bookworm screenshots
 
-Before submission, capture the final responsive UI and replace this file's checklist with the image files below.
+These are live captures from the public deployment at `https://bookworm-iota-livid.vercel.app`.
+
+## Desktop
 
 - `home.png`
 - `library.png`
@@ -10,4 +12,8 @@ Before submission, capture the final responsive UI and replace this file's check
 - `about.png`
 - `not-found.png`
 
-Use real project screens, not design mockups. Include at least one mobile capture in the final project documentation.
+## Mobile (390 × 844)
+
+- `home-mobile.png`
+- `library-mobile.png`
+- `reader-mobile.png`
