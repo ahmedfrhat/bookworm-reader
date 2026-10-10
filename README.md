@@ -78,7 +78,7 @@ docs/screenshots/        # Final submission screenshots
 - npm
 
 ```bash
-git clone <your-new-github-repository-url>
+git clone https://github.com/ahmedfrhat/bookworm-reader.git
 cd bookworm-reader
 npm install
 npm run dev
